@@ -12,7 +12,7 @@
 	<artifactId>thesis-alien-game</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>thesis-alien-game</name>
-	<description>Bug tracking for Cassandra</description>
+	<description>Bug tracking with Cassandra</description>
 	<url/>
 	<licenses>
 		<license/>
