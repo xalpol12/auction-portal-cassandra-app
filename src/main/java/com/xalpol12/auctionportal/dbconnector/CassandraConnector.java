@@ -66,6 +66,7 @@ public class CassandraConnector {
                 "','replication_factor':" + replicationFactor +
                 "};";
         var result = session.execute(query);
+        session.execute("use auctionPortal");
         return result.wasApplied();
     }
 
