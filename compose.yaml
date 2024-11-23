@@ -12,6 +12,8 @@ services:
       - cass-1
     environment:
       - SPRING_DATASOURCE_URL=cassandra://cassandra:9042
+      - REPLICATION_STRATEGY=SimpleStrategy
+      - REPLICATION_FACTOR=1
     networks:
       - cassandra
 
