@@ -1,4 +1,4 @@
-package com.xalpol12.thesis_alien_game;
+package com.xalpol12.auctionportal;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

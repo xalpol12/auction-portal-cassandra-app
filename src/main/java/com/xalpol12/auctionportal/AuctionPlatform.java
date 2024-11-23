@@ -1,13 +1,13 @@
-package com.xalpol12.thesis_alien_game;
+package com.xalpol12.auctionportal;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ThesisAlienGameApplication {
+public class AuctionPlatform {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ThesisAlienGameApplication.class, args);
+		SpringApplication.run(AuctionPlatform.class, args);
 	}
 
 }

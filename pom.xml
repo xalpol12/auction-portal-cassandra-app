@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.xalpol12</groupId>
-	<artifactId>thesis-alien-game</artifactId>
+	<artifactId>auction-portal</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>thesis-alien-game</name>
-	<description>Bug tracking with Cassandra</description>
+	<name>auction-portal</name>
+	<description>Auction portal with Cassandra</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -27,7 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>23</java.version>
+		<java.version>21</java.version>
 	</properties>
 	<dependencies>
 		<dependency>

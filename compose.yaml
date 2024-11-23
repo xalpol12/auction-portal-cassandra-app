@@ -1,13 +1,13 @@
 version: '3.8'
 
 services:
-  bug-tracker:
+  auction-portal:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - '8080:8080'
-    container_name: bug-tracker
+    container_name: auction-portal
     depends_on:
       - cass-1
     environment:

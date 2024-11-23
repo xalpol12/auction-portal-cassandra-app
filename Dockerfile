@@ -1,5 +1,5 @@
-FROM openjdk:23-jdk
+FROM amazoncorretto:21
 WORKDIR /app
-COPY target/bug-tracking-casandra-app.jar app.jar
+COPY target/auction-portal-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
