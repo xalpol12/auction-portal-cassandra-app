@@ -19,6 +19,6 @@ public class Bid {
     private UUID id;
     private UUID userId;
     private BigDecimal bidValue;
-    private LocalDateTime bidTime;
+    private Long bidTime;
     private BidValidity bidValidity;
 }
