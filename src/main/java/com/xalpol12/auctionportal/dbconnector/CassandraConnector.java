@@ -82,6 +82,19 @@ public class CassandraConnector {
         var usersResult = session.execute(createUsers);
 
         StringBuilder sb2 = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
+                .append("AUCTIONS_ID").append("(")
+                .append("id UUID, ")
+                .append("start_date TIMESTAMP, ")
+                .append("end_date TIMESTAMP, ")
+                .append("auction_name text, ")
+                .append("start_price DECIMAL, ")
+                .append("status text, ")
+                .append("auction_winner UUID, ")
+                .append("PRIMARY KEY (id));");
+        String createAuctions = sb2.toString();
+        var auctionsResult = session.execute(createAuctions);
+
+        StringBuilder sb3 = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
                 .append("AUCTIONS").append("(")
                 .append("id UUID, ")
                 .append("start_date TIMESTAMP, ")
@@ -90,14 +103,14 @@ public class CassandraConnector {
                 .append("start_price DECIMAL, ")
                 .append("status text, ")
                 .append("auction_winner UUID, ")
-                .append("PRIMARY KEY (status, id, end_date))")
-                .append("WITH CLUSTERING ORDER BY (id ASC, end_date ASC);");
-        String createAuctions = sb2.toString();
-        var auctionsResult = session.execute(createAuctions);
+                .append("PRIMARY KEY (status, end_date))")
+                .append("WITH CLUSTERING ORDER BY (end_date ASC);");
+        String createAuctions_dates = sb2.toString();
+        var auctionsResult_dates = session.execute(createAuctions_dates);
 
         // TODO: Ponder idea of creating redundancy in tables to get easier access to data
 
-        StringBuilder sb3 = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
+        StringBuilder sb4 = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
                 .append("BIDS").append("(")
                 .append("auction_id UUID, ")
                 .append("id UUID, ")
@@ -108,9 +121,9 @@ public class CassandraConnector {
                 .append("PRIMARY KEY (auction_id, bid_value))")
                 .append("WITH CLUSTERING ORDER BY (bid_value DESC);");
 
-        String createBids = sb3.toString();
+        String createBids = sb4.toString();
         var bidsResult = session.execute(createBids);
 
-        return usersResult.wasApplied() && auctionsResult.wasApplied() && bidsResult.wasApplied();
+        return usersResult.wasApplied() && auctionsResult.wasApplied() && bidsResult.wasApplied() && auctionsResult_dates.wasApplied();
     }
 }
