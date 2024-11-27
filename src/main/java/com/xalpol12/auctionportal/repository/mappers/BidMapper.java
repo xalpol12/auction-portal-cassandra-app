@@ -23,11 +23,10 @@ public class BidMapper implements CassandraMapper<Bid>{
 
     @Override
     public String getInsertStatement(String tableName) {
-        return new StringBuilder("INSERT INTO ")
-                .append(tableName)
-                .append(" (auction_id, id, user_id, bid_value, bid_timestamp, bid_validity) ")
-                .append("VALUES ")
-                .append("(?, ?, ?, ?, ?, ?)")
-                .toString();
+        return "INSERT INTO " +
+                tableName +
+                " (auction_id, id, user_id, bid_value, bid_timestamp, bid_validity) " +
+                "VALUES " +
+                "(?, ?, ?, ?, ?, ?)";
     }
 }

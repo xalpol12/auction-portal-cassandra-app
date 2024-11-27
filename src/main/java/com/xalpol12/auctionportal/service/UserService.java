@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -18,5 +19,9 @@ public class UserService {
 
     public List<User> selectAll() {
         return userRepository.selectAll();
+    }
+
+    public User selectById(UUID id) {
+        return userRepository.selectById(id);
     }
 }

@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -14,6 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class User {
     private UUID id;
-    private UUID name;
-    private List<UUID> auctions;
+    private String name;
+    private Set<UUID> auctions;
 }

@@ -74,9 +74,8 @@ public class CassandraConnector {
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
                 .append("USERS").append("(")
                 .append("id UUID, ")
-                .append("name UUID, ")
-                .append("auctions LIST<UUID>, ")
-                .append("PRIMARY KEY (name));");
+                .append("name text, ")
+                .append("PRIMARY KEY (id));");
 
         String createUsers = sb.toString();
         var usersResult = session.execute(createUsers);
@@ -88,9 +87,8 @@ public class CassandraConnector {
                 .append("end_date TIMESTAMP, ")
                 .append("auction_name text, ")
                 .append("start_price DECIMAL, ")
-                .append("status text, ")
                 .append("auction_winner UUID, ")
-                .append("PRIMARY KEY (status, id));");
+                .append("PRIMARY KEY (status, end_date, start_date, id));");
         String createAuctions = sb2.toString();
         var auctionsResult = session.execute(createAuctions);
 

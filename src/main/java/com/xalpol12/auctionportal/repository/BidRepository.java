@@ -12,7 +12,6 @@ import com.xalpol12.auctionportal.repository.mappers.CassandraMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ public class BidRepository {
     private static final String TABLE_NAME = "BIDS";
     private final Session session;
     private final CassandraMapper<Bid> bidMapper;
-    private final MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter;
 
     private PreparedStatement SELECT_ALL_WITH_AUCTION_ID;
     private PreparedStatement INSERT_INTO_BIDS;
