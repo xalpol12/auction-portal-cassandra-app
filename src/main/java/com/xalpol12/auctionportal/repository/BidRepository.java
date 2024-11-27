@@ -45,24 +45,45 @@ public class BidRepository {
 
     public Bid insert(Bid bid) {
         BoundStatement bsInsert = new BoundStatement(INSERT_INTO_BIDS);
+        bid.setAuctionId(bid.getAuctionId());
+        bid.setId(UUID.randomUUID());
+        bid.setBidTime(new Date().toInstant().toEpochMilli());
+        bid.setBidValidity(BidValidity.INVALID);
+
         bsInsert.bind(
                 bid.getAuctionId(),
-                UUID.randomUUID(),
+                bid.getId(),
                 bid.getUserId(),
                 bid.getBidValue(),
-                new Date(),
-                BidValidity.INVALID.toString()
+                bid.getBidTime(),
+                bid.getBidValidity().toString()
         );
 
         ResultSet insertResult = session.execute(bsInsert);
-        Bid insertedBid = bidMapper.map(insertResult.one());
 
+        if (insertResult.wasApplied()) {
+            return bid;
+        } else {
+            throw new RuntimeException("Insert failed");
+        }
+    }
+
+    public Bid update(Bid bid) {
         BoundStatement bsUpdate = new BoundStatement(UPDATE_BID_VALIDITY);
-        bsUpdate.bind(BidValidity.VALID.toString(), insertedBid.getAuctionId(), insertedBid.getBidValue(), insertedBid.getId());
+        bid.setBidValidity(BidValidity.VALID);
+        bsUpdate.bind(
+                bid.getBidValidity().toString(),
+                bid.getAuctionId(),
+                bid.getBidValue(),
+                bid.getId());
 
         ResultSet updateResult = session.execute(bsUpdate);
 
-        return bidMapper.map(updateResult.one());
+        if (updateResult.wasApplied()) {
+            return bid;
+        } else {
+            throw new RuntimeException("Update failed");
+        }
     }
 
     @PostConstruct

@@ -1,0 +1,22 @@
+package com.xalpol12.auctionportal.service;
+
+import com.xalpol12.auctionportal.model.User;
+import com.xalpol12.auctionportal.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+    private final UserRepository userRepository;
+
+    public User insert(User user) {
+        return userRepository.insert(user);
+    }
+
+    public List<User> selectAll() {
+        return userRepository.selectAll();
+    }
+}
