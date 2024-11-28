@@ -100,8 +100,8 @@ public class CassandraConnector {
                 .append("bid_value DECIMAL, ")
                 .append("bid_timestamp TIMESTAMP, ")
                 .append("bid_validity TEXT, ")
-                .append("PRIMARY KEY (auction_id, bid_value, id))")
-                .append("WITH CLUSTERING ORDER BY (bid_value DESC);");
+                .append("PRIMARY KEY (auction_id, bid_validity, bid_value, id))")
+                .append("WITH CLUSTERING ORDER BY (bid_validity ASC, bid_value DESC);");
 
         String createBids = sb3.toString();
         var bidsResult = session.execute(createBids);

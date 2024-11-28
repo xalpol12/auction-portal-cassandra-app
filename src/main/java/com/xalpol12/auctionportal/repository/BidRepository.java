@@ -66,6 +66,17 @@ public class BidRepository {
         }
     }
 
+    public List<Bid> selectAllByAuctionId(UUID auctionId) {
+        BoundStatement bsSelect = new BoundStatement(SELECT_ALL_WITH_AUCTION_ID);
+        bsSelect.bind(auctionId);
+        ResultSet result = session.execute(bsSelect);
+        List<Bid> bids = new ArrayList<>();
+
+        result.forEach(x -> bids.add(bidMapper.map(x)));
+
+        return bids;
+    }
+
     public Bid update(Bid bid) {
         BoundStatement bsUpdate = new BoundStatement(UPDATE_BID_VALIDITY);
         bid.setBidValidity(BidValidity.VALID);

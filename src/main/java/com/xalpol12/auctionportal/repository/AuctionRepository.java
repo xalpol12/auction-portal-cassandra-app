@@ -1,16 +1,13 @@
 package com.xalpol12.auctionportal.repository;
 
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.*;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.xalpol12.auctionportal.model.Auction;
 import com.xalpol12.auctionportal.repository.mappers.CassandraMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.Select;
-import com.datastax.driver.core.ResultSet;
 
 import java.util.*;
 
@@ -48,6 +45,26 @@ public class AuctionRepository {
         } else {
             throw new RuntimeException("Insert failed");
         }
+    }
+
+    public Auction selectById(UUID auctionID) {
+        Select.Where select = QueryBuilder.select().all().from(TABLE_NAME).where(QueryBuilder.eq("id", auctionID));
+        ResultSet result = session.execute(select);
+        var optional = Optional.ofNullable(result.one());
+        if (optional.isPresent()) {
+            return auctionMapper.map(result.one());
+        } else {
+            throw new RuntimeException("Select failed");
+        }
+    }
+
+    public List<Auction> selectAllByIds(List<UUID> ids) {
+        Select.Where select = QueryBuilder.select().all().from(TABLE_NAME).where(QueryBuilder.in("id", ids));
+        ResultSet result = session.execute(select);
+        List<Auction> auctions = new ArrayList<>();
+
+        result.forEach(x -> auctions.add(auctionMapper.map(x)));
+        return auctions;
     }
 
     @PostConstruct
