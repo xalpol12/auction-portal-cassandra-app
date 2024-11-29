@@ -25,7 +25,7 @@ import java.util.Date;
 public class BidRepository {
     private static final String TABLE_NAME = "BIDS";
     private final Session session;
-    private final CassandraMapper<Bid> bidMapper;
+    private final CassandraMapper<Bid, Bid.BidInput> bidMapper;
 
     private PreparedStatement SELECT_ALL_WITH_AUCTION_ID;
     private PreparedStatement INSERT_INTO_BIDS;
@@ -41,12 +41,9 @@ public class BidRepository {
         return bids;
     }
 
-    public Bid insert(Bid bid) {
+    public Bid insert(Bid.BidInput bidInput) {
         BoundStatement bsInsert = new BoundStatement(INSERT_INTO_BIDS);
-        bid.setAuctionId(bid.getAuctionId());
-        bid.setId(UUID.randomUUID());
-        bid.setBidTime(new Date().toInstant().toEpochMilli());
-        bid.setBidValidity(BidValidity.INVALID);
+        Bid bid = bidMapper.map(bidInput);
 
         bsInsert.bind(
                 bid.getAuctionId(),
@@ -106,6 +103,7 @@ public class BidRepository {
 
         INSERT_INTO_BIDS = session.prepare(bidMapper.getInsertStatement(TABLE_NAME));
 
+        // TODO: Fix
         UPDATE_BID_VALIDITY = session.prepare(
                 new StringBuilder("UPDATE ")
                         .append(TABLE_NAME)

@@ -52,11 +52,15 @@ public class CassandraConnector {
             log.info("Keyspace not initialised");
         }
 
+        dropTables();
+
         if (initializeTables()) {
             log.info("Tables initialised successfully");
         } else {
             log.info("Tables not initialised");
         }
+
+        runInserts();
     }
 
     private boolean initializeKeyspace() {
@@ -70,11 +74,20 @@ public class CassandraConnector {
         return result.wasApplied();
     }
 
+    private void dropTables() {
+        session.execute("USE AUCTIONPORTAL");
+
+        session.execute("DROP TABLE IF EXISTS USERS");
+        session.execute("DROP TABLE IF EXISTS AUCTIONS");
+        session.execute("DROP TABLE IF EXISTS BIDS");
+    }
+
     private boolean initializeTables() {
         StringBuilder sb = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
                 .append("USERS").append("(")
                 .append("id UUID, ")
                 .append("name text, ")
+                .append("auctions Set<UUID>, ")
                 .append("PRIMARY KEY (id));");
 
         String createUsers = sb.toString();
@@ -88,7 +101,7 @@ public class CassandraConnector {
                 .append("auction_name text, ")
                 .append("start_price DECIMAL, ")
                 .append("auction_winner UUID, ")
-                .append("PRIMARY KEY (status, end_date, start_date, id));");
+                .append("PRIMARY KEY (id, end_date, start_date));");
         String createAuctions = sb2.toString();
         var auctionsResult = session.execute(createAuctions);
 
@@ -107,5 +120,22 @@ public class CassandraConnector {
         var bidsResult = session.execute(createBids);
 
         return usersResult.wasApplied() && auctionsResult.wasApplied() && bidsResult.wasApplied();
+    }
+
+    private void runInserts() {
+        session.execute("USE AUCTIONPORTAL");
+
+        // Insert users
+        session.execute("INSERT INTO USERS (id, name) VALUES (uuid(), 'Artur')");
+        session.execute("INSERT INTO USERS (id, name) VALUES (uuid(), 'Fryderyk')");
+        session.execute("INSERT INTO USERS (id, name) VALUES (uuid(), 'Simona')");
+        session.execute("INSERT INTO USERS (id, name) VALUES (uuid(), 'Hanna')");
+
+        session.execute("INSERT INTO AUCTIONS (id, end_date, start_date, auction_name, start_price) " +
+                "VALUES (uuid(), '2025-12-31T23:59:59.000+0000', '2024-12-01T12:00:00.000+0000', 'Sprzedam OPLA tanio', 1.00)");
+        session.execute("INSERT INTO AUCTIONS (id, end_date, start_date, auction_name, start_price) " +
+                "VALUES (uuid(), '2025-12-31T23:59:59.000+0000', '2024-12-01T12:00:00.000+0000', 'IPhone20', 5.00)");
+        session.execute("INSERT INTO AUCTIONS (id, end_date, start_date, auction_name, start_price) " +
+                "VALUES (uuid(), '2025-12-31T23:59:59.000+0000', '2024-12-01T12:00:00.000+0000', 'Jaja wiejskie 12 sztuk', 12.00)");
     }
 }

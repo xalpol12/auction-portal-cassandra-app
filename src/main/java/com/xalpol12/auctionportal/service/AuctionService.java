@@ -12,7 +12,7 @@ import java.util.List;
 public class AuctionService {
     private final AuctionRepository auctionRepository;
 
-    public Auction insert(Auction auction) {
+    public Auction insert(Auction.AuctionInput auction) {
         return auctionRepository.insert(auction);
     }
 

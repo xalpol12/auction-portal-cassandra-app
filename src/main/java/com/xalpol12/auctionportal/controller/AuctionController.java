@@ -2,6 +2,7 @@ package com.xalpol12.auctionportal.controller;
 
 import com.xalpol12.auctionportal.model.Auction;
 import com.xalpol12.auctionportal.service.AuctionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +16,8 @@ public class AuctionController {
     private final AuctionService auctionService;
 
     @PostMapping()
-    public ResponseEntity<Auction> insert(@RequestBody Auction auction) {
-        Auction result = auctionService.insert(auction);
+    public ResponseEntity<Auction> insert(@Valid @RequestBody Auction.AuctionInput auctionInput) {
+        Auction result = auctionService.insert(auctionInput);
         return ResponseEntity.ok(result);
     }
 

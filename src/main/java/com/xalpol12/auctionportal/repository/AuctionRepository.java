@@ -16,7 +16,7 @@ import java.util.*;
 public class AuctionRepository {
     private final static String TABLE_NAME = "AUCTIONS";
     private final Session session;
-    private final CassandraMapper<Auction> auctionMapper;
+    private final CassandraMapper<Auction, Auction.AuctionInput> auctionMapper;
 
     private PreparedStatement INSERT_INTO_AUCTIONS;
 
@@ -29,9 +29,9 @@ public class AuctionRepository {
         return auctions;
     }
 
-    public Auction insert(Auction auction) {
+    public Auction insert(Auction.AuctionInput auctionInput) {
         BoundStatement bsInsert = new BoundStatement(INSERT_INTO_AUCTIONS);
-        auction.setId(UUID.randomUUID());
+        Auction auction = auctionMapper.map(auctionInput);
         bsInsert.bind(
                 auction.getId(),
                 auction.getStartDate(),

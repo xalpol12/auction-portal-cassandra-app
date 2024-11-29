@@ -1,5 +1,6 @@
 package com.xalpol12.auctionportal.model;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +17,7 @@ public class User {
     private UUID id;
     private String name;
     private Set<UUID> auctions;
+
+    public record UserInput(@NotBlank String name) {
+    }
 }

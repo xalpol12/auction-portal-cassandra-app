@@ -17,29 +17,29 @@ public class BidService {
     private final UserRepository userRepository;
     private final AuctionRepository auctionRepository;
 
-    public Bid insert(Bid bid) {
+    public Bid insert(Bid.BidInput bidInput) {
         // TODO: Probably add some null-checks
         // Get auction for context
-        Auction auction = auctionRepository.selectById(bid.getAuctionId());
+        Auction auction = auctionRepository.selectById(bidInput.auctionId());
         // Fetch other bids to decide if bid is even high enough
-        List<Bid> bids = bidRepository.selectAllByAuctionId(bid.getAuctionId());
+        List<Bid> bids = bidRepository.selectAllByAuctionId(bidInput.auctionId());
         // Action if there are no other bids
         if (bids.isEmpty()) {
-            if (bid.getBidValue().compareTo(auction.getStartPrice()) != -1) {
+            if (bidInput.bidValue().compareTo(auction.getStartPrice()) != -1) {
                 throw new RuntimeException("Bid too low!");
             }
             // Action if there are other bids
-        } else if (bids.getFirst().getBidValue().compareTo(bid.getBidValue()) != -1) {
+        } else if (bids.getFirst().getBidValue().compareTo(bidInput.bidValue()) != -1) {
             throw new RuntimeException("Bid too low!");
         }
         // Insert new bid
-        Bid insertedBid = bidRepository.insert(bid);
+        Bid insertedBid = bidRepository.insert(bidInput);
         // Check if bid was placed at the right time
-        if (bid.getBidTime() < auction.getEndDate() && bid.getBidTime() > auction.getStartDate()) {
+        if (insertedBid.getBidTime() < auction.getEndDate() && insertedBid.getBidTime() > auction.getStartDate()) {
             // Update bid validity if possible
             Bid updatedBid = bidRepository.update(insertedBid);
             // Add auction to user
-            userRepository.addAuction(bid.getAuctionId(), bid.getUserId());
+            userRepository.addAuction(bidInput.auctionId(), bidInput.userId());
             return updatedBid;
         } else {
             throw new RuntimeException("Bid placed to late!");

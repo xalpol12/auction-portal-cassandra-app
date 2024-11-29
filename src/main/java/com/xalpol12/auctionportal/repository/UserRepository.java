@@ -22,14 +22,14 @@ public class UserRepository {
 
     private static final String TABLE_NAME = "USERS";
     private final Session session;
-    private final CassandraMapper<User> userMapper;
+    private final CassandraMapper<User, User.UserInput> userMapper;
 
     private PreparedStatement INSERT_INTO_USERS;
     private PreparedStatement SELECT_USER_BY_ID;
 
-    public User insert(User user) {
+    public User insert(User.UserInput userInput) {
         BoundStatement bsInsert = new BoundStatement(INSERT_INTO_USERS);
-        user.setId(UUID.randomUUID());
+        User user = userMapper.map(userInput);
         bsInsert.bind(user.getId(), user.getName(), user.getAuctions());
         ResultSet result = session.execute(bsInsert);
         if (result.wasApplied()) {

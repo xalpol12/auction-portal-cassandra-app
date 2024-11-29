@@ -6,8 +6,11 @@ import com.datastax.driver.core.Row;
 import com.xalpol12.auctionportal.model.enums.BidValidity;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.UUID;
+
 @Service
-public class BidMapper implements CassandraMapper<Bid>{
+public class BidMapper implements CassandraMapper<Bid, Bid.BidInput>{
 
     @Override
     public Bid map(Row row){
@@ -19,6 +22,19 @@ public class BidMapper implements CassandraMapper<Bid>{
                 .bidTime(row.getTimestamp("bid_timestamp").getTime())
                 .bidValidity(BidValidity.valueOf(row.getString("bid_validity")))
                 .build();
+    }
+
+    @Override
+    public Bid map(Bid.BidInput bidInput) {
+        return Bid.builder()
+                .auctionId(bidInput.auctionId())
+                .id(UUID.randomUUID())
+                .userId(bidInput.userId())
+                .bidValue(bidInput.bidValue())
+                .bidTime(new Date().toInstant().toEpochMilli())
+                .bidValidity(BidValidity.INVALID)
+                .build();
+
     }
 
     @Override

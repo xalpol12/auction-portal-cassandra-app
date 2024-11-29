@@ -4,10 +4,11 @@ import com.datastax.driver.core.Row;
 import com.xalpol12.auctionportal.model.User;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Service
-public class UserMapper implements CassandraMapper<User> {
+public class UserMapper implements CassandraMapper<User, User.UserInput> {
 
     @Override
     public User map(Row row) {
@@ -15,6 +16,15 @@ public class UserMapper implements CassandraMapper<User> {
                 .id(row.getUUID("id"))
                 .name(row.getString("name"))
                 .auctions(row.getSet("auctions", UUID.class))
+                .build();
+    }
+
+    @Override
+    public User map(User.UserInput record) {
+        return User.builder()
+                .id(UUID.randomUUID())
+                .name(record.name())
+                .auctions(Set.of())
                 .build();
     }
 

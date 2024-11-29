@@ -1,5 +1,8 @@
 package com.xalpol12.auctionportal.model;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,4 +21,15 @@ public class Auction {
     private Long endDate;
     private String auctionName;
     private BigDecimal startPrice;
+
+    public record AuctionInput(
+            @Positive
+            Long startDate,
+            @Positive
+            Long endDate,
+            @NotBlank
+            String auctionName,
+            @DecimalMin(value = "0.0", inclusive = false)
+            BigDecimal startPrice) {
+    }
 }

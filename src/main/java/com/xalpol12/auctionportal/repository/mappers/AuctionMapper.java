@@ -4,10 +4,10 @@ import com.datastax.driver.core.Row;
 import com.xalpol12.auctionportal.model.Auction;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
-public class AuctionMapper implements CassandraMapper<Auction> {
+public class AuctionMapper implements CassandraMapper<Auction, Auction.AuctionInput> {
 
     @Override
     public Auction map(Row row) {
@@ -16,7 +16,18 @@ public class AuctionMapper implements CassandraMapper<Auction> {
                 .startDate(row.getTimestamp("start_date").getTime())
                 .endDate(row.getTimestamp("end_date").getTime())
                 .auctionName(row.getString("auction_name"))
-                .startPrice(new BigDecimal(row.getString("start_price")))
+                .startPrice(row.getDecimal("start_price"))
+                .build();
+    }
+
+    @Override
+    public Auction map(Auction.AuctionInput auctionInput) {
+        return Auction.builder()
+                .id(UUID.randomUUID())
+                .startDate(auctionInput.startDate())
+                .endDate(auctionInput.endDate())
+                .auctionName(auctionInput.auctionName())
+                .startPrice(auctionInput.startPrice())
                 .build();
     }
 

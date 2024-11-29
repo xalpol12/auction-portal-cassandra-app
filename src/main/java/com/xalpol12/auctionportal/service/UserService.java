@@ -13,8 +13,8 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
 
-    public User insert(User user) {
-        return userRepository.insert(user);
+    public User insert(User.UserInput userInput) {
+        return userRepository.insert(userInput);
     }
 
     public List<User> selectAll() {
