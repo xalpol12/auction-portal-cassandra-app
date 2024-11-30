@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -17,16 +18,16 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Auction {
     private UUID id;
-    private Long startDate;
-    private Long endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private String auctionName;
     private BigDecimal startPrice;
 
     public record AuctionInput(
             @Positive
-            Long startDate,
+            LocalDateTime startDate,
             @Positive
-            Long endDate,
+            LocalDateTime endDate,
             @NotBlank
             String auctionName,
             @DecimalMin(value = "0.0", inclusive = false)

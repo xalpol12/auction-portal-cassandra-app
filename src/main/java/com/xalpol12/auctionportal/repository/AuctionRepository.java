@@ -28,7 +28,7 @@ public class AuctionRepository {
         result.forEach(x -> auctions.add(auctionMapper.map(x)));
         return auctions;
     }
-
+    // TODO: Probably conversion from LocalDateTime to Date on fileds
     public Auction insert(Auction.AuctionInput auctionInput) {
         BoundStatement bsInsert = new BoundStatement(INSERT_INTO_AUCTIONS);
         Auction auction = auctionMapper.map(auctionInput);
@@ -52,7 +52,7 @@ public class AuctionRepository {
         ResultSet result = session.execute(select);
         var optional = Optional.ofNullable(result.one());
         if (optional.isPresent()) {
-            return auctionMapper.map(result.one());
+            return auctionMapper.map(optional.get());
         } else {
             throw new RuntimeException("Select failed");
         }

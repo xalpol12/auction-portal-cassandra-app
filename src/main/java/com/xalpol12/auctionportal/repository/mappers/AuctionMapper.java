@@ -2,6 +2,7 @@ package com.xalpol12.auctionportal.repository.mappers;
 
 import com.datastax.driver.core.Row;
 import com.xalpol12.auctionportal.model.Auction;
+import com.xalpol12.auctionportal.utils.DateToLocalDateTime;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -13,8 +14,8 @@ public class AuctionMapper implements CassandraMapper<Auction, Auction.AuctionIn
     public Auction map(Row row) {
         return Auction.builder()
                 .id(row.getUUID("id"))
-                .startDate(row.getTimestamp("start_date").getTime())
-                .endDate(row.getTimestamp("end_date").getTime())
+                .startDate(DateToLocalDateTime.toLocalDateTime(row.getTimestamp("start_date")))
+                .endDate(DateToLocalDateTime.toLocalDateTime(row.getTimestamp("end_date")))
                 .auctionName(row.getString("auction_name"))
                 .startPrice(row.getDecimal("start_price"))
                 .build();

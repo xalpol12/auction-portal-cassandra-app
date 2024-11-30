@@ -25,4 +25,10 @@ public class RestExceptionHandler {
         });
         return errors;
     }
+//
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    @ExceptionHandler(RuntimeException.class)
+//    public String handleRuntimeExceptions(RuntimeException ex) {
+//        return ex.toString();
+//    }
 }

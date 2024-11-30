@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -77,9 +79,9 @@ public class CassandraConnector {
     private void dropTables() {
         session.execute("USE AUCTIONPORTAL");
 
-        session.execute("DROP TABLE IF EXISTS USERS");
-        session.execute("DROP TABLE IF EXISTS AUCTIONS");
-        session.execute("DROP TABLE IF EXISTS BIDS");
+        session.execute("DROP TABLE IF EXISTS USERS;");
+        session.execute("DROP TABLE IF EXISTS AUCTIONS;");
+        session.execute("DROP TABLE IF EXISTS BIDS;");
     }
 
     private boolean initializeTables() {
@@ -100,7 +102,6 @@ public class CassandraConnector {
                 .append("end_date TIMESTAMP, ")
                 .append("auction_name text, ")
                 .append("start_price DECIMAL, ")
-                .append("auction_winner UUID, ")
                 .append("PRIMARY KEY (id, end_date, start_date));");
         String createAuctions = sb2.toString();
         var auctionsResult = session.execute(createAuctions);
@@ -112,9 +113,8 @@ public class CassandraConnector {
                 .append("user_id UUID, ")
                 .append("bid_value DECIMAL, ")
                 .append("bid_timestamp TIMESTAMP, ")
-                .append("bid_validity TEXT, ")
-                .append("PRIMARY KEY (auction_id, bid_validity, bid_value, id))")
-                .append("WITH CLUSTERING ORDER BY (bid_validity ASC, bid_value DESC);");
+                .append("PRIMARY KEY (auction_id, bid_value, id))")
+                .append("WITH CLUSTERING ORDER BY (bid_value DESC);");
 
         String createBids = sb3.toString();
         var bidsResult = session.execute(createBids);
@@ -125,17 +125,22 @@ public class CassandraConnector {
     private void runInserts() {
         session.execute("USE AUCTIONPORTAL");
 
-        // Insert users
-        session.execute("INSERT INTO USERS (id, name) VALUES (uuid(), 'Artur')");
-        session.execute("INSERT INTO USERS (id, name) VALUES (uuid(), 'Fryderyk')");
-        session.execute("INSERT INTO USERS (id, name) VALUES (uuid(), 'Simona')");
-        session.execute("INSERT INTO USERS (id, name) VALUES (uuid(), 'Hanna')");
+        session.execute("INSERT INTO USERS (id, name) VALUES (6ef8fb66-8572-4bb0-af8e-48549ca2d071, 'Artur');");
+        session.execute("INSERT INTO USERS (id, name) VALUES (6ef8fb66-8572-4bb0-af8e-48549ca2d072, 'Fryderyk');");
+        session.execute("INSERT INTO USERS (id, name) VALUES (6ef8fb66-8572-4bb0-af8e-48549ca2d073, 'Simona');");
+        session.execute("INSERT INTO USERS (id, name) VALUES (6ef8fb66-8572-4bb0-af8e-48549ca2d074, 'Hanna');");
 
         session.execute("INSERT INTO AUCTIONS (id, end_date, start_date, auction_name, start_price) " +
-                "VALUES (uuid(), '2025-12-31T23:59:59.000+0000', '2024-12-01T12:00:00.000+0000', 'Sprzedam OPLA tanio', 1.00)");
-        session.execute("INSERT INTO AUCTIONS (id, end_date, start_date, auction_name, start_price) " +
-                "VALUES (uuid(), '2025-12-31T23:59:59.000+0000', '2024-12-01T12:00:00.000+0000', 'IPhone20', 5.00)");
-        session.execute("INSERT INTO AUCTIONS (id, end_date, start_date, auction_name, start_price) " +
-                "VALUES (uuid(), '2025-12-31T23:59:59.000+0000', '2024-12-01T12:00:00.000+0000', 'Jaja wiejskie 12 sztuk', 12.00)");
+                "VALUES (edc6981b-db87-41ec-a62a-4c1900ed8a9a, '2025-12-31T23:59:59.000+0000', '2024-11-01T12:00:00.000+0000', 'Sprzedam OPLA tanio', 1.00);");
+
+        LocalDateTime datePlusThree = LocalDateTime.now().plusMinutes(3);
+        String insertJaja = "INSERT INTO AUCTIONS (id, end_date, start_date, auction_name, start_price) VALUES (01649ac3-7f29-40fa-bf35-7535579a272f, '"
+                + datePlusThree + "', '2024-11-01T12:00:00.000+0000', 'Jaja wiejskie 12 sztuk', 12.00);";
+        session.execute(insertJaja);
+
+        LocalDateTime datePlusFive = LocalDateTime.now().plusMinutes(5);
+        String insertIphone = "INSERT INTO AUCTIONS (id, end_date, start_date, auction_name, start_price) VALUES (55f7fe87-68de-40a8-99b8-7246d8608404, '"
+                + datePlusFive + "', '2024-11-01T12:00:00.000+0000', 'IPhone20', 5.00);";
+        session.execute(insertIphone);
     }
 }

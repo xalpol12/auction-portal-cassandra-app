@@ -7,17 +7,17 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
 import com.xalpol12.auctionportal.model.Bid;
-import com.xalpol12.auctionportal.model.enums.BidValidity;
 import com.xalpol12.auctionportal.repository.mappers.CassandraMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.Date;
 
 @Slf4j
 @Repository
@@ -29,7 +29,6 @@ public class BidRepository {
 
     private PreparedStatement SELECT_ALL_WITH_AUCTION_ID;
     private PreparedStatement INSERT_INTO_BIDS;
-    private PreparedStatement UPDATE_BID_VALIDITY;
 
     public List<Bid> selectAll() {
         Select select = QueryBuilder.select().all().from(TABLE_NAME);
@@ -41,17 +40,15 @@ public class BidRepository {
         return bids;
     }
 
-    public Bid insert(Bid.BidInput bidInput) {
+    public Bid insert(Bid bid) {
         BoundStatement bsInsert = new BoundStatement(INSERT_INTO_BIDS);
-        Bid bid = bidMapper.map(bidInput);
 
         bsInsert.bind(
                 bid.getAuctionId(),
                 bid.getId(),
                 bid.getUserId(),
                 bid.getBidValue(),
-                bid.getBidTime(),
-                bid.getBidValidity().toString()
+                Date.from(bid.getBidTime().toInstant(ZoneOffset.UTC))
         );
 
         ResultSet insertResult = session.execute(bsInsert);
@@ -74,24 +71,6 @@ public class BidRepository {
         return bids;
     }
 
-    public Bid update(Bid bid) {
-        BoundStatement bsUpdate = new BoundStatement(UPDATE_BID_VALIDITY);
-        bid.setBidValidity(BidValidity.VALID);
-        bsUpdate.bind(
-                bid.getBidValidity().toString(),
-                bid.getAuctionId(),
-                bid.getBidValue(),
-                bid.getId());
-
-        ResultSet updateResult = session.execute(bsUpdate);
-
-        if (updateResult.wasApplied()) {
-            return bid;
-        } else {
-            throw new RuntimeException("Update failed");
-        }
-    }
-
     @PostConstruct
     private void init() {
         SELECT_ALL_WITH_AUCTION_ID = session.prepare(
@@ -102,16 +81,6 @@ public class BidRepository {
         );
 
         INSERT_INTO_BIDS = session.prepare(bidMapper.getInsertStatement(TABLE_NAME));
-
-        // TODO: Fix
-        UPDATE_BID_VALIDITY = session.prepare(
-                new StringBuilder("UPDATE ")
-                        .append(TABLE_NAME)
-                        .append(" SET bid_validity=?")
-                        .append(" WHERE ")
-                        .append("auction_id=? AND bid_value=? AND id=?")
-                        .toString()
-        );
     }
 
 }

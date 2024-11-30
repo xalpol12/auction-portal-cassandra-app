@@ -1,6 +1,5 @@
 package com.xalpol12.auctionportal.model;
 
-import com.xalpol12.auctionportal.model.enums.BidValidity;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +9,7 @@ import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -20,8 +20,7 @@ public class Bid {
     private UUID id;
     private UUID userId;
     private BigDecimal bidValue;
-    private Long bidTime;
-    private BidValidity bidValidity;
+    private LocalDateTime bidTime;
 
     public record BidInput(
             @NonNull

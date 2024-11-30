@@ -5,6 +5,7 @@ import com.xalpol12.auctionportal.model.Bid;
 import com.xalpol12.auctionportal.repository.AuctionRepository;
 import com.xalpol12.auctionportal.repository.BidRepository;
 import com.xalpol12.auctionportal.repository.UserRepository;
+import com.xalpol12.auctionportal.repository.mappers.BidMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ public class BidService {
     private final BidRepository bidRepository;
     private final UserRepository userRepository;
     private final AuctionRepository auctionRepository;
+    private final BidMapper bidMapper;
 
     public Bid insert(Bid.BidInput bidInput) {
         // TODO: Probably add some null-checks
@@ -25,7 +27,7 @@ public class BidService {
         List<Bid> bids = bidRepository.selectAllByAuctionId(bidInput.auctionId());
         // Action if there are no other bids
         if (bids.isEmpty()) {
-            if (bidInput.bidValue().compareTo(auction.getStartPrice()) != -1) {
+            if (bidInput.bidValue().compareTo(auction.getStartPrice()) != 1) {
                 throw new RuntimeException("Bid too low!");
             }
             // Action if there are other bids
@@ -33,16 +35,12 @@ public class BidService {
             throw new RuntimeException("Bid too low!");
         }
         // Insert new bid
-        Bid insertedBid = bidRepository.insert(bidInput);
+        Bid bid = bidMapper.map(bidInput);
         // Check if bid was placed at the right time
-        if (insertedBid.getBidTime() < auction.getEndDate() && insertedBid.getBidTime() > auction.getStartDate()) {
-            // Update bid validity if possible
-            Bid updatedBid = bidRepository.update(insertedBid);
-            // Add auction to user
-            userRepository.addAuction(bidInput.auctionId(), bidInput.userId());
-            return updatedBid;
+        if (bid.getBidTime().isBefore(auction.getEndDate()) && bid.getBidTime().isAfter(auction.getStartDate())) {
+            return bidRepository.insert(bid);
         } else {
-            throw new RuntimeException("Bid placed to late!");
+            throw new RuntimeException("Bid placed too early or too late!");
         }
     }
 
