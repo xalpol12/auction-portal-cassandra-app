@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Slf4j
 @Service
@@ -19,11 +20,14 @@ import java.time.LocalDateTime;
 public class CassandraConnector {
 
     @Value("${CASS_HOST_NAME}")
-    private String hostName;
+    private String hostNames;
     @Value("${REPLICATION_STRATEGY}")
     private String replicationStrategy;
     @Value("${REPLICATION_FACTOR}")
     private String replicationFactor;
+
+    private static int CONNECTION_RETRIES = 5;
+    private static int RETRY_DELAY_SECONDS = 10;
 
     @Getter
     private Session session;
@@ -31,8 +35,12 @@ public class CassandraConnector {
 
     @PreDestroy
     public void close() {
-        session.close();
-        cluster.close();
+        if (session != null) {
+            session.close();
+        }
+        if (cluster != null) {
+            cluster.close();
+        }
     }
 
     @PostConstruct
@@ -42,9 +50,30 @@ public class CassandraConnector {
     }
 
     private void connect() {
-        Builder builder = Cluster.builder().addContactPoint(hostName).withPort(9042);
-        cluster = builder.build();
-        session = cluster.connect();
+        for (int i = 0; i < CONNECTION_RETRIES; i++) {
+            try {
+                Builder builder = Cluster.builder();
+                Arrays.stream(hostNames.split(","))
+                        .forEach(builder::addContactPoint);
+                cluster = builder.withPort(9042)
+//                .withLoadBalancingPolicy()  // TODO: discuss available configs https://docs.datastax.com/en/developer/java-driver/3.2/manual/load_balancing/index.html
+//                .withSpeculativeExecutionPolicy() // TODO: same as above https://docs.datastax.com/en/developer/java-driver/3.2/manual/speculative_execution/index.html
+//                .withRetryPolicy() // TODO: same as above https://docs.datastax.com/en/developer/java-driver/3.2/manual/retries/index.html
+                        .build();
+                session = cluster.connect();
+                log.info("Successfully connected to Cassandra cluster: {}", cluster.getMetadata().getClusterName());
+                return;
+            } catch (Exception e) {
+                log.warn("Failed to connect to Cassandra. Retrying in {} seconds... ({}/{})", RETRY_DELAY_SECONDS, i + 1, CONNECTION_RETRIES);
+                try {
+                    Thread.sleep(RETRY_DELAY_SECONDS * 1000L);
+                } catch (InterruptedException interruptedException) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Connection retry interrupted", interruptedException);
+                }
+            }
+
+        }
     }
 
     private void setUpDb() {
