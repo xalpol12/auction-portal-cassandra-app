@@ -3,9 +3,7 @@ package com.xalpol12.auctionportal.model;
 import lombok.Builder;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @Builder
 public record AuctionWinner (

@@ -27,7 +27,7 @@ public class CassandraConnector {
     private String replicationFactor;
 
     private static int CONNECTION_RETRIES = 5;
-    private static int RETRY_DELAY_SECONDS = 10;
+    private static int RETRY_DELAY_SECONDS = 20;
 
     @Getter
     private Session session;

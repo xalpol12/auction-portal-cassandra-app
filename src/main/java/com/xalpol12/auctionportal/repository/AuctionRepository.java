@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import com.datastax.driver.core.querybuilder.Select;
 
+import java.time.ZoneOffset;
 import java.util.*;
 
 @Repository
@@ -28,14 +29,14 @@ public class AuctionRepository {
         result.forEach(x -> auctions.add(auctionMapper.map(x)));
         return auctions;
     }
-    // TODO: Probably conversion from LocalDateTime to Date on fileds
+
     public Auction insert(Auction.AuctionInput auctionInput) {
         BoundStatement bsInsert = new BoundStatement(INSERT_INTO_AUCTIONS);
         Auction auction = auctionMapper.map(auctionInput);
         bsInsert.bind(
                 auction.getId(),
-                auction.getStartDate(),
-                auction.getEndDate(),
+                Date.from(auction.getStartDate().toInstant(ZoneOffset.UTC)),
+                Date.from(auction.getEndDate().toInstant(ZoneOffset.UTC)),
                 auction.getAuctionName(),
                 auction.getStartPrice()
         );

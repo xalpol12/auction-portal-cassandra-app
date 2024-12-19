@@ -13,6 +13,8 @@ import java.util.Map;
 @RestControllerAdvice
 public class RestExceptionHandler {
 
+    //TODO: Zwracać odpowiednie kody dla odpowiednich operacji tj. rozróżnić nieprawidłowy bid od zakończonej aukcji
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationExceptions(

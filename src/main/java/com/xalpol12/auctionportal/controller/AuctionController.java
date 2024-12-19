@@ -17,6 +17,8 @@ import java.util.UUID;
 public class AuctionController {
     private final AuctionService auctionService;
 
+    //TODO: Dodać endpoint do czyszczenia bazy albo poszczególnych tabel
+
     @PostMapping()
     public ResponseEntity<Auction> insert(@Valid @RequestBody Auction.AuctionInput auctionInput) {
         Auction result = auctionService.insert(auctionInput);

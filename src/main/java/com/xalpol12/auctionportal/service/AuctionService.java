@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +36,7 @@ public class AuctionService {
         return AuctionWinner.map(auction);
     }
 
+    // TODO: Dodawanie aukcji z endpointa nie działa - prawdopodobnie walnięte daty?
     public Auction insert(Auction.AuctionInput auction) {
         return auctionRepository.insert(auction);
     }
