@@ -18,10 +18,9 @@ func InitUser(name string) *model.User {
 }
 
 func InitAuction(auctionName string) *model.Auction {
-	auction := model.Auction{AuctionName: auctionName, StartDate: time.Now(), EndDate: time.Now().Add(time.Second * 5), StartPrice: float64(1)}
+	auction := model.Auction{AuctionName: auctionName, StartDate: utils.FormatDate(time.Now()), EndDate: utils.FormatDate(time.Now().Add(time.Second * 5)), StartPrice: float64(1)}
 
 	return sendRequest(&auction, utils.AuctionsAddr)
-
 }
 
 func PutBid(auctionId string, userId string, bidValue float64) *model.Bid {
