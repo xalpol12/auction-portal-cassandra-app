@@ -24,19 +24,18 @@ public class AuctionService {
 
     public AuctionWinner getAuctionById(UUID auctionId) {
         Auction auction = auctionRepository.selectById(auctionId);
-        if (auction.getEndDate().isBefore(LocalDateTime.now())) {
-            List<Bid> bids = bidRepository.selectAllByAuctionId(auctionId);
-            Bid winningBid;
-            if (!CollectionUtils.isEmpty(bids)) {
-                winningBid = bids.getFirst();
-                User winner = userRepository.selectById(winningBid.getUserId());
-                return AuctionWinner.map(auction, winner, winningBid);
-            }
+        List<Bid> bids = bidRepository.selectAllByAuctionId(auctionId);
+        Bid winningBid = null;
+        if (!CollectionUtils.isEmpty(bids)) {
+            winningBid = bids.getFirst();
         }
-        return AuctionWinner.map(auction);
+        if (auction.getEndDate().isBefore(LocalDateTime.now())) {
+            User winner = userRepository.selectById(winningBid.getUserId());
+            return AuctionWinner.map(auction, winner, winningBid);
+        }
+        return AuctionWinner.map(auction, winningBid);
     }
 
-    // TODO: Dodawanie aukcji z endpointa nie działa - prawdopodobnie walnięte daty?
     public Auction insert(Auction.AuctionInput auction) {
         return auctionRepository.insert(auction);
     }

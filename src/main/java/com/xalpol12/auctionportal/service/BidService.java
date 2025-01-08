@@ -1,5 +1,7 @@
 package com.xalpol12.auctionportal.service;
 
+import com.xalpol12.auctionportal.exception.BidOutOfTimeException;
+import com.xalpol12.auctionportal.exception.BidTooLowException;
 import com.xalpol12.auctionportal.model.Auction;
 import com.xalpol12.auctionportal.model.Bid;
 import com.xalpol12.auctionportal.repository.AuctionRepository;
@@ -20,7 +22,6 @@ public class BidService {
     private final BidMapper bidMapper;
 
     public Bid insert(Bid.BidInput bidInput) {
-        // TODO: Probably add some null-checks
         // Get auction for context
         Auction auction = auctionRepository.selectById(bidInput.auctionId());
         // Fetch other bids to decide if bid is even high enough
@@ -28,11 +29,11 @@ public class BidService {
         // Action if there are no other bids
         if (bids.isEmpty()) {
             if (bidInput.bidValue().compareTo(auction.getStartPrice()) != 1) {
-                throw new RuntimeException("Bid too low!");
+                throw new BidTooLowException("Bid too low!");
             }
             // Action if there are other bids
         } else if (bids.getFirst().getBidValue().compareTo(bidInput.bidValue()) != -1) {
-            throw new RuntimeException("Bid too low!");
+            throw new BidTooLowException("Bid too low!");
         }
         // Insert new bid
         Bid bid = bidMapper.map(bidInput);
@@ -40,7 +41,7 @@ public class BidService {
         if (bid.getBidTime().isBefore(auction.getEndDate()) && bid.getBidTime().isAfter(auction.getStartDate())) {
             return bidRepository.insert(bid);
         } else {
-            throw new RuntimeException("Bid placed too early or too late!");
+            throw new BidOutOfTimeException("Bid placed too early or too late!");
         }
     }
 

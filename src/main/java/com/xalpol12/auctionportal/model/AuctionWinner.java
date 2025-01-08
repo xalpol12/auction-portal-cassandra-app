@@ -4,6 +4,7 @@ import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Builder
 public record AuctionWinner (
@@ -34,5 +35,15 @@ public record AuctionWinner (
                 .winningValue(bid.getBidValue())
                 .winningBidTime(bid.getBidTime())
                 .build();
+    }
+
+    public static AuctionWinner map(Auction auction, Bid bid) {
+        Optional<Bid> possibleBid = Optional.ofNullable(bid);
+        if (possibleBid.isPresent()) {
+            return AuctionWinner.getBuilder(auction)
+                    .winningValue(bid.getBidValue())
+                    .build();
+        }
+        return AuctionWinner.getBuilder(auction).build();
     }
 }

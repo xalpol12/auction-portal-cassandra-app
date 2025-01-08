@@ -24,9 +24,7 @@ public class Auction {
     private BigDecimal startPrice;
 
     public record AuctionInput(
-            @Positive
             LocalDateTime startDate,
-            @Positive
             LocalDateTime endDate,
             @NotBlank
             String auctionName,

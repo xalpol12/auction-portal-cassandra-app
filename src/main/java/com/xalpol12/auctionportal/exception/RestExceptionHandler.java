@@ -1,6 +1,8 @@
 package com.xalpol12.auctionportal.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,12 +15,26 @@ import java.util.Map;
 @RestControllerAdvice
 public class RestExceptionHandler {
 
-    //TODO: Zwracać odpowiednie kody dla odpowiednich operacji tj. rozróżnić nieprawidłowy bid od zakończonej aukcji
-
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
+        return getError(ex);
+    }
+
+    @ResponseStatus(HttpStatus.PAYMENT_REQUIRED)
+    @ExceptionHandler(BidTooLowException.class)
+    public RuntimeException handleBidTooLowException(BidTooLowException ex) {
+        return ex;
+    }
+
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    @ExceptionHandler(BidOutOfTimeException.class)
+    public RuntimeException handleBidNotInTimeException(BidOutOfTimeException ex) {
+        return ex;
+    }
+
+    private static Map<String, String> getError(BindException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -27,10 +43,4 @@ public class RestExceptionHandler {
         });
         return errors;
     }
-//
-//    @ResponseStatus(HttpStatus.BAD_REQUEST)
-//    @ExceptionHandler(RuntimeException.class)
-//    public String handleRuntimeExceptions(RuntimeException ex) {
-//        return ex.toString();
-//    }
 }
