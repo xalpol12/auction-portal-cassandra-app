@@ -2,8 +2,13 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"os"
+	"os/exec"
+	"runtime"
 	"stress-tests/model"
 	"stress-tests/test"
+	"stress-tests/utils"
 	"sync"
 	"time"
 )
@@ -12,39 +17,71 @@ import (
 // odpalenie gorutyn na /bids i wrzucanie bidów do końca aukcji - aż nie dostanie 500
 
 func main() {
+	test.WipeDB()
+
 	users := []string{"Tadeusz", "Marek", "Hieronim", "Anastazja", "Genowefa", "Krystyna"}
-	var createdUsers = make([]model.User, 0)
+	var createdUsers = make([]*model.User, 0)
 	for _, user := range users {
 		createdUser := test.InitUser(user)
-		createdUsers = append(createdUsers, *createdUser)
+		createdUsers = append(createdUsers, createdUser)
 	}
 
 	fmt.Println(createdUsers)
 
-	auction := test.InitAuction("Sprzedam obraz Słynnego Austriackiego Akwarelisty")
-	fmt.Println(auction)
-	response := make(chan *model.Bid)
+	auctions := []string{"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio"}
+
+	createdAuctions := make([]*model.Auction, 0)
+	for _, auction := range auctions {
+		createdAuctions = append(createdAuctions, test.InitAuction(auction, (rand.Intn(3)+1)*5))
+	}
+
+	responses := make(chan *model.Bid)
 
 	var wg sync.WaitGroup
 
-	for i, realUser := range createdUsers {
-		wg.Add(1)
-		go sendRequest(auction.Id, realUser.Id, float64(20+i), response, &wg)
-		time.Sleep(100 * time.Millisecond)
+	for _, realUser := range createdUsers {
+		for _, realAuction := range createdAuctions {
+			wg.Add(1)
+			go sendRequest(realAuction.Id, realUser.Id, float64(500), responses, &wg)
+			time.Sleep(200 * time.Millisecond)
+		}
 	}
 
-	// TODO: Pobieranie najwyższego bida i podbijanie przed wysłaniem, logowanie jeśli się nie uda -> odczytało starą wartość lub ktoś już wrzucił bida
+	go func() {
+		wg.Wait()
+		close(responses)
+	}()
 
-	for range createdUsers {
-		fmt.Println(<-response)
+	for response := range responses {
+		fmt.Println(response)
 	}
 
-	//bid := test.PutBid(auction.Id, createdUsers[0].Id, float64(20))
+	time.Sleep(5 * time.Second)
 
-	//fmt.Println(bid)
+	clearTerminal()
+
+	for _, endedAuction := range createdAuctions {
+		winningAuction := model.AuctionWinner{}
+		test.GetFromRest(utils.AuctionsAddr+"/"+endedAuction.Id, &winningAuction)
+		winningAuction.Print()
+	}
+
 }
 
-func sendRequest(auctionId, userId string, bidValue float64, response chan<- *model.Bid, wg *sync.WaitGroup) {
+func clearTerminal() {
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("cmd", "/c", "cls")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	} else {
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	}
+	fmt.Print("\033[H\033[2J")
+}
+
+func sendRequest(auctionId, userId string, highestAllowedBid float64, response chan<- *model.Bid, wg *sync.WaitGroup) {
 	defer wg.Done()
-	response <- test.PutBid(auctionId, userId, bidValue)
+	test.PutBid(auctionId, userId, highestAllowedBid, response)
 }

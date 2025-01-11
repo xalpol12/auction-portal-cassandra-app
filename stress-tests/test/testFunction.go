@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"stress-tests/model"
 	"stress-tests/utils"
@@ -18,35 +19,43 @@ func InitUser(name string) *model.User {
 	return userResponse
 }
 
-func InitAuction(auctionName string) *model.Auction {
-	auction := model.Auction{AuctionName: auctionName, StartDate: utils.FormatDate(time.Now()), EndDate: utils.FormatDate(time.Now().Add(time.Second * 5)), StartPrice: float64(1)}
+func InitAuction(auctionName string, auctionTime int) *model.Auction {
+	auction := model.Auction{AuctionName: auctionName, StartDate: utils.FormatDate(time.Now()), EndDate: utils.FormatDate(time.Now().Add(time.Duration(auctionTime) * time.Second)), StartPrice: float64(1)}
 
 	auctionResponse, _ := sendRequest(&auction, utils.AuctionsAddr)
 	return auctionResponse
 }
 
-func PutBid(auctionId string, userId string, bidValue float64) *model.Bid {
-	bid := model.Bid{AuctionId: auctionId, UserId: userId, BidValue: bidValue}
+func PutBid(auctionId string, userId string, highestAllowedBid float64, output chan<- *model.Bid) {
+	bid := model.Bid{AuctionId: auctionId, UserId: userId}
 
-	highestBid := getHighestBid(auctionId)
+	for {
+		highestBid := getHighestBid(auctionId)
 
-	bid.BidValue = highestBid + 1
+		bid.BidValue = highestBid + 1
 
-	responseBid, code := sendRequest(&bid, utils.BidsAddr)
+		if bid.BidValue > highestAllowedBid {
+			break
+		}
 
-	switch code {
-	case 200:
-		return responseBid
-	case 402:
-		//fmt.Println("Mismatched")
-		return PutBid(auctionId, userId, bidValue+1)
+		responseBid, code := sendRequest(&bid, utils.BidsAddr)
+
+		switch code {
+		case 200:
+			output <- responseBid
+			continue
+		case 402:
+			continue
+		case 406:
+			log.Printf("Auction has ended")
+			return
+		}
 	}
-	return nil
 }
 
 func getHighestBid(auctionId string) float64 {
-	var responseBid *model.AuctionWinner
-	responseBid = getFromRest[model.AuctionWinner](utils.AuctionsAddr + "/" + auctionId)
+	responseBid := model.AuctionWinner{}
+	GetFromRest(utils.AuctionsAddr+"/"+auctionId, &responseBid)
 	return responseBid.WinningValue
 }
 
@@ -74,7 +83,7 @@ func sendRequest[T any](v *T, addr string) (*T, int) {
 	return v, response.StatusCode
 }
 
-func getFromRest[T any](url string) *T {
+func GetFromRest[T any](url string, v *T) {
 	response, err := http.Get(url)
 	if err != nil {
 		if err != nil {
@@ -93,11 +102,21 @@ func getFromRest[T any](url string) *T {
 			fmt.Println(fmt.Errorf("failure during read response: %w", err))
 		}
 	}
-	var v *T
 	err = json.Unmarshal(responseBody, v)
 	if err != nil {
 		fmt.Println(fmt.Errorf("failure during unmarshal response: %w", err))
 	}
+}
 
-	return v
+func WipeDB() {
+	req, err := http.NewRequest(http.MethodDelete, utils.Tests, nil)
+	if err != nil {
+		fmt.Println(fmt.Errorf("failure during http delete: %w", err))
+	}
+	client := &http.Client{}
+
+	_, err1 := client.Do(req)
+	if err1 != nil {
+		fmt.Println(fmt.Errorf("failure during http delete: %w", err1))
+	}
 }

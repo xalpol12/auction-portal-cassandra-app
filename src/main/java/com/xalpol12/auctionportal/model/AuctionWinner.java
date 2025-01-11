@@ -44,6 +44,8 @@ public record AuctionWinner (
                     .winningValue(bid.getBidValue())
                     .build();
         }
-        return AuctionWinner.getBuilder(auction).build();
+        return AuctionWinner.getBuilder(auction)
+                .winningValue(auction.getStartPrice())
+                .build();
     }
 }

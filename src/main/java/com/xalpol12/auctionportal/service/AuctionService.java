@@ -8,14 +8,17 @@ import com.xalpol12.auctionportal.repository.AuctionRepository;
 import com.xalpol12.auctionportal.repository.BidRepository;
 import com.xalpol12.auctionportal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuctionService {
     private final AuctionRepository auctionRepository;
@@ -27,10 +30,11 @@ public class AuctionService {
         List<Bid> bids = bidRepository.selectAllByAuctionId(auctionId);
         Bid winningBid = null;
         if (!CollectionUtils.isEmpty(bids)) {
+            bids.sort(Comparator.comparing(Bid::getBidValue).thenComparing(Bid::getBidTime));
             winningBid = bids.getFirst();
         }
         if (auction.getEndDate().isBefore(LocalDateTime.now())) {
-            User winner = userRepository.selectById(winningBid.getUserId());
+            User winner = userRepository.selectById(winningBid != null ? winningBid.getUserId() : null);
             return AuctionWinner.map(auction, winner, winningBid);
         }
         return AuctionWinner.map(auction, winningBid);

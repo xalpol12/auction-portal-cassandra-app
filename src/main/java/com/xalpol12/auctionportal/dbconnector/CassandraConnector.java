@@ -76,7 +76,7 @@ public class CassandraConnector {
         }
     }
 
-    private void setUpDb() {
+    public void setUpDb() {
         if (initializeKeyspace()) {
             log.info("Keyspace initialised successfully");
         } else {
@@ -91,7 +91,7 @@ public class CassandraConnector {
             log.info("Tables not initialised");
         }
 
-        runInserts();
+//        runInserts();
     }
 
     private boolean initializeKeyspace() {

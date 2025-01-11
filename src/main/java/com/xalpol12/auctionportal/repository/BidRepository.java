@@ -1,11 +1,9 @@
 package com.xalpol12.auctionportal.repository;
 
-import com.datastax.driver.core.BoundStatement;
-import com.datastax.driver.core.PreparedStatement;
-import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Session;
+import com.datastax.driver.core.*;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.datastax.driver.core.querybuilder.Select;
+import com.xalpol12.auctionportal.exception.BidTooLowException;
 import com.xalpol12.auctionportal.model.Bid;
 import com.xalpol12.auctionportal.repository.mappers.CassandraMapper;
 import jakarta.annotation.PostConstruct;
@@ -14,10 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Repository
@@ -29,6 +24,7 @@ public class BidRepository {
 
     private PreparedStatement SELECT_ALL_WITH_AUCTION_ID;
     private PreparedStatement INSERT_INTO_BIDS;
+    private PreparedStatement SELECT_HIGHEST_BY_AUCTION_ID;
 
     public List<Bid> selectAll() {
         Select select = QueryBuilder.select().all().from(TABLE_NAME);
@@ -51,13 +47,17 @@ public class BidRepository {
                 Date.from(bid.getBidTime().toInstant(ZoneOffset.UTC))
         );
 
-        ResultSet insertResult = session.execute(bsInsert);
 
-        if (insertResult.wasApplied()) {
-            return bid;
-        } else {
-            throw new RuntimeException("Insert failed");
+        Bid highestBid = selectHighestByAuctionId(bid.getAuctionId());
+        if (Objects.isNull(highestBid) || (highestBid.getBidValue().compareTo(bid.getBidValue()) != 1)) {
+            ResultSet insertResult = session.execute(bsInsert);
+            if (insertResult.wasApplied()) {
+                return bid;
+            } else {
+                throw new RuntimeException("Insert failed");
+            }
         }
+        throw new BidTooLowException("Bid too low!");
     }
 
     public List<Bid> selectAllByAuctionId(UUID auctionId) {
@@ -71,6 +71,17 @@ public class BidRepository {
         return bids;
     }
 
+    public Bid selectHighestByAuctionId(UUID auctionId) {
+        BoundStatement bsSelect = new BoundStatement(SELECT_HIGHEST_BY_AUCTION_ID);
+        bsSelect.bind(auctionId);
+        ResultSet result = session.execute(bsSelect);
+        Row row = result.one();
+        if (row == null ) {
+            return null;
+        }
+        return bidMapper.map(row);
+    }
+
     @PostConstruct
     private void init() {
         SELECT_ALL_WITH_AUCTION_ID = session.prepare(
@@ -81,6 +92,13 @@ public class BidRepository {
         );
 
         INSERT_INTO_BIDS = session.prepare(bidMapper.getInsertStatement(TABLE_NAME));
+        SELECT_HIGHEST_BY_AUCTION_ID = session.prepare(
+                new StringBuilder("SELECT * FROM ")
+                        .append(TABLE_NAME)
+                        .append(" WHERE auction_id=?")
+                        .append(" LIMIT 1;")
+                        .toString()
+        );
     }
 
 }

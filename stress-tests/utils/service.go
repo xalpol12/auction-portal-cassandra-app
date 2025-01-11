@@ -7,6 +7,7 @@ var (
 	UsersAddr      = ServiceAddress + "users"
 	BidsAddr       = ServiceAddress + "bids"
 	AuctionsAddr   = ServiceAddress + "auctions"
+	Tests          = ServiceAddress + "tests"
 )
 
 func FormatDate(date time.Time) string {

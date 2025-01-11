@@ -1,5 +1,7 @@
 package model
 
+import "fmt"
+
 type User struct {
 	Id       string   `json:"id,omitempty"`
 	Name     string   `json:"name,omitempty"`
@@ -34,4 +36,8 @@ type AuctionWinner struct {
 	WinningUsername string  `json:"winningUsername,omitempty"`
 	WinningValue    float64 `json:"winningValue,omitempty"`
 	WinningBidTime  string  `json:"winningBidTime,omitempty"`
+}
+
+func (au *AuctionWinner) Print() {
+	fmt.Printf("Auction name: %s\nWinner: %s\nFinal price: %.f\n\n", au.AuctionName, au.WinningUsername, au.WinningValue)
 }
