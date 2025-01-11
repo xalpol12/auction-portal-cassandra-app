@@ -26,23 +26,31 @@ public class BidService {
         Auction auction = auctionRepository.selectById(bidInput.auctionId());
         // Fetch other bids to decide if bid is even high enough
         List<Bid> bids = bidRepository.selectAllByAuctionId(bidInput.auctionId());
-        // Action if there are no other bids
+
+        boolean isBidTooLow = false;
         if (bids.isEmpty()) {
             if (bidInput.bidValue().compareTo(auction.getStartPrice()) != 1) {
-                throw new BidTooLowException("Bid too low!");
+                isBidTooLow = true;
             }
             // Action if there are other bids
         } else if (bids.getFirst().getBidValue().compareTo(bidInput.bidValue()) != -1) {
-            throw new BidTooLowException("Bid too low!");
+            isBidTooLow = true;
         }
         // Insert new bid
         Bid bid = bidMapper.map(bidInput);
-        // Check if bid was placed at the right time
-        if (bid.getBidTime().isBefore(auction.getEndDate()) && bid.getBidTime().isAfter(auction.getStartDate())) {
+        boolean isInvalidBidTime = isInvalidBidTime(auction, bid);
+
+        if (!isInvalidBidTime && !isBidTooLow) {
             return bidRepository.insert(bid);
-        } else {
+        } else if (isInvalidBidTime) {
             throw new BidOutOfTimeException("Bid placed too early or too late!");
+        } else {
+            throw new BidTooLowException("Bid too low!");
         }
+    }
+
+    public boolean isInvalidBidTime(Auction auction, Bid bid) {
+        return !(bid.getBidTime().isBefore(auction.getEndDate()) && bid.getBidTime().isAfter(auction.getStartDate()));
     }
 
     public List<Bid> selectAll() {

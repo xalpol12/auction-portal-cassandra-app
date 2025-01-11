@@ -32,7 +32,7 @@ func main() {
 
 	createdAuctions := make([]*model.Auction, 0)
 	for _, auction := range auctions {
-		createdAuctions = append(createdAuctions, test.InitAuction(auction, (rand.Intn(3)+1)*5))
+		createdAuctions = append(createdAuctions, test.InitAuction(auction, (rand.Intn(4)+1)*5))
 	}
 
 	responses := make(chan *model.Bid)
@@ -69,16 +69,17 @@ func main() {
 }
 
 func clearTerminal() {
-	if runtime.GOOS == "windows" {
+	switch runtime.GOOS {
+	case "windows":
 		cmd := exec.Command("cmd", "/c", "cls")
 		cmd.Stdout = os.Stdout
-		cmd.Run()
-	} else {
-		cmd := exec.Command("clear")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
+		err := cmd.Run()
+		if err != nil {
+			fmt.Print("\033[H\033[2J") // Fallback to ANSI escape codes
+		}
+	default: // Linux, macOS, etc.
+		fmt.Print("\033[H\033[2J\033[3J")
 	}
-	fmt.Print("\033[H\033[2J")
 }
 
 func sendRequest(auctionId, userId string, highestAllowedBid float64, response chan<- *model.Bid, wg *sync.WaitGroup) {
