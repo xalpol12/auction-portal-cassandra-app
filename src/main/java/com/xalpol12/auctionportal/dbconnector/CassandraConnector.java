@@ -56,9 +56,6 @@ public class CassandraConnector {
                 Arrays.stream(hostNames.split(","))
                         .forEach(builder::addContactPoint);
                 cluster = builder.withPort(9042)
-//                .withLoadBalancingPolicy()  // TODO: discuss available configs https://docs.datastax.com/en/developer/java-driver/3.2/manual/load_balancing/index.html
-//                .withSpeculativeExecutionPolicy() // TODO: same as above https://docs.datastax.com/en/developer/java-driver/3.2/manual/speculative_execution/index.html
-//                .withRetryPolicy() // TODO: same as above https://docs.datastax.com/en/developer/java-driver/3.2/manual/retries/index.html
                         .build();
                 session = cluster.connect();
                 log.info("Successfully connected to Cassandra cluster: {}", cluster.getMetadata().getClusterName());
@@ -142,8 +139,8 @@ public class CassandraConnector {
                 .append("user_id UUID, ")
                 .append("bid_value DECIMAL, ")
                 .append("bid_timestamp TIMESTAMP, ")
-                .append("PRIMARY KEY (auction_id, bid_value, id))")
-                .append("WITH CLUSTERING ORDER BY (bid_value DESC);");
+                .append("PRIMARY KEY (auction_id, bid_value, bid_timestamp, id))")
+                .append("WITH CLUSTERING ORDER BY (bid_value DESC, bid_timestamp DESC);");
 
         String createBids = sb3.toString();
         var bidsResult = session.execute(createBids);

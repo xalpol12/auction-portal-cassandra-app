@@ -13,9 +13,6 @@ import (
 	"time"
 )
 
-// insert danych potrzebnych do testów
-// odpalenie gorutyn na /bids i wrzucanie bidów do końca aukcji - aż nie dostanie 500
-
 func main() {
 	test.WipeDB()
 
@@ -32,7 +29,7 @@ func main() {
 
 	createdAuctions := make([]*model.Auction, 0)
 	for _, auction := range auctions {
-		createdAuctions = append(createdAuctions, test.InitAuction(auction, (rand.Intn(4)+1)*5))
+		createdAuctions = append(createdAuctions, test.InitAuction(auction, rand.Intn(4)+2*5))
 	}
 
 	responses := make(chan *model.Bid)

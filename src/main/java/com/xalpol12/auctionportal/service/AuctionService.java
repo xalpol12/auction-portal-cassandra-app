@@ -30,14 +30,11 @@ public class AuctionService {
         List<Bid> bids = bidRepository.selectAllByAuctionId(auctionId);
         Bid winningBid = null;
         if (!CollectionUtils.isEmpty(bids)) {
-            bids.sort(Comparator.comparing(Bid::getBidValue).thenComparing(Bid::getBidTime).reversed());
             winningBid = bids.getFirst();
-            if (auction.getEndDate().isBefore(LocalDateTime.now())) {
-                User winner = userRepository.selectById(winningBid != null ? winningBid.getUserId() : null);
-                return AuctionWinner.map(auction, winner, winningBid);
-            }
+            User winner = userRepository.selectById(winningBid != null ? winningBid.getUserId() : null);
+            return AuctionWinner.map(auction, winner, winningBid);
         }
-        return AuctionWinner.map(auction, winningBid);
+        return AuctionWinner.map(auction);
     }
 
     public Auction insert(Auction.AuctionInput auction) {
