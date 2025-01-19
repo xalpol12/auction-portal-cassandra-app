@@ -29,12 +29,14 @@ func main() {
 
 	createdAuctions := make([]*model.Auction, 0)
 	for _, auction := range auctions {
-		createdAuctions = append(createdAuctions, test.InitAuction(auction, rand.Intn(4)+2*5))
+		createdAuctions = append(createdAuctions, test.InitAuction(auction, (rand.Intn(4)+3)*5))
 	}
 
 	responses := make(chan *model.Bid)
 
 	var wg sync.WaitGroup
+
+	time.Sleep(3 * time.Second)
 
 	for _, realUser := range createdUsers {
 		for _, realAuction := range createdAuctions {
