@@ -20,6 +20,7 @@ public class PerformanceTestController {
         log.info("Wiping out DB tables");
         performanceTestService.wipeDb();
         log.info("DB tables wiped out");
+        BidController.COUNTER = 0;
         return ResponseEntity.noContent().build();
     }
 

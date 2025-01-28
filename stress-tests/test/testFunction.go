@@ -26,7 +26,7 @@ func InitAuction(auctionName string, auctionTime int) *model.Auction {
 	return auctionResponse
 }
 
-func PutBid(auctionId string, userId string, highestAllowedBid float64, output chan<- *model.Bid) {
+func PutBid(auctionId string, userId string, highestAllowedBid float64) {
 	bid := model.Bid{AuctionId: auctionId, UserId: userId}
 
 	for {
@@ -38,11 +38,10 @@ func PutBid(auctionId string, userId string, highestAllowedBid float64, output c
 			break
 		}
 
-		responseBid, code := sendRequest(&bid, utils.BidsAddr)
+		_, code := sendRequest(&bid, utils.BidsAddr)
 
 		switch code {
 		case 200:
-			output <- responseBid
 			continue
 		case 402:
 			continue

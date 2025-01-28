@@ -32,6 +32,7 @@ public class AuctionController {
     @GetMapping
     public ResponseEntity<List<Auction>> selectAll() {
         log.info("Performing GET call on /auctions");
+        log.info("TOTAL BID CALLS: {}", BidController.COUNTER);
         return ResponseEntity.ok(auctionService.selectAll());
     }
 

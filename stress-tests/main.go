@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"os/exec"
 	"runtime"
@@ -16,7 +15,12 @@ import (
 func main() {
 	test.WipeDB()
 
-	users := []string{"Tadeusz", "Marek", "Hieronim", "Anastazja", "Genowefa", "Krystyna"}
+	users := []string{"Tadeusz", "Marek", "Hieronim", "Anastazja", "Genowefa", "Krystyna",
+		"Tadeusz", "Marek", "Hieronim", "Anastazja", "Genowefa", "Krystyna",
+		"Tadeusz", "Marek", "Hieronim", "Anastazja", "Genowefa", "Krystyna",
+		"Tadeusz", "Marek", "Hieronim", "Anastazja", "Genowefa", "Krystyna",
+		"Tadeusz", "Marek", "Hieronim", "Anastazja", "Genowefa", "Krystyna",
+	}
 	var createdUsers = make([]*model.User, 0)
 	for _, user := range users {
 		createdUser := test.InitUser(user)
@@ -25,14 +29,20 @@ func main() {
 
 	fmt.Println(createdUsers)
 
-	auctions := []string{"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio"}
+	auctions := []string{"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio",
+		"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio",
+		"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio",
+		"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio",
+		"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio",
+		"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio",
+		"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio",
+		"Zaliczenia z SWN", "Gotowe projekty z Cassandry", "Przerobione SLR", "Tytuł magistra", "Sprzedam Opla, tanio",
+	}
 
 	createdAuctions := make([]*model.Auction, 0)
 	for _, auction := range auctions {
-		createdAuctions = append(createdAuctions, test.InitAuction(auction, (rand.Intn(4)+3)*5))
+		createdAuctions = append(createdAuctions, test.InitAuction(auction, 33))
 	}
-
-	responses := make(chan *model.Bid)
 
 	var wg sync.WaitGroup
 
@@ -41,19 +51,12 @@ func main() {
 	for _, realUser := range createdUsers {
 		for _, realAuction := range createdAuctions {
 			wg.Add(1)
-			go sendRequest(realAuction.Id, realUser.Id, float64(500), responses, &wg)
+			go sendRequest(realAuction.Id, realUser.Id, float64(500), &wg)
 			time.Sleep(200 * time.Millisecond)
 		}
 	}
 
-	go func() {
-		wg.Wait()
-		close(responses)
-	}()
-
-	for response := range responses {
-		fmt.Println(response)
-	}
+	wg.Wait()
 
 	time.Sleep(5 * time.Second)
 
@@ -81,7 +84,7 @@ func clearTerminal() {
 	}
 }
 
-func sendRequest(auctionId, userId string, highestAllowedBid float64, response chan<- *model.Bid, wg *sync.WaitGroup) {
+func sendRequest(auctionId, userId string, highestAllowedBid float64, wg *sync.WaitGroup) {
 	defer wg.Done()
-	test.PutBid(auctionId, userId, highestAllowedBid, response)
+	test.PutBid(auctionId, userId, highestAllowedBid)
 }

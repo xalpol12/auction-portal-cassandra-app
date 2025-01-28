@@ -16,12 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BidController {
     private final BidService bidService;
+    static int COUNTER = 0;
 
     @PostMapping("bids")
     ResponseEntity<Bid> addBid(@Valid @RequestBody Bid.BidInput bidInput) {
-        log.info("Starting POST call on /bids, body: {}", bidInput);
         Bid result = bidService.insert(bidInput);
-        log.info("Ending POST call on /bids, result: {}", result);
+        COUNTER++;
         return ResponseEntity.ok(result);
     }
 
